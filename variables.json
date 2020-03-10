@@ -1,0 +1,8 @@
+{
+  "subscription_id": "subscription-id",
+  "client_id": "service-principal-id",
+  "client_secret": "service-principal-secret-password",
+  "tenant_id": "tenant-id-for-service-principal",
+  "azure-resource-group": "jen-test-azure-gold",
+  "azure-image-size": "Standard_A4_v2"
+}
