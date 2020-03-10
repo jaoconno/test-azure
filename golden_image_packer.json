@@ -1,0 +1,65 @@
+{
+  "variables": {
+    "client_id": "",
+    "client_secret": "",
+    "subscription_id": "",
+    "tenant_id": "",
+    "azure-resource-group": "default",
+    "azure-image-builder-size": "Standard_A4_v2"
+  },
+
+  "builders": [{
+    "type": "azure-arm",
+
+    "client_id": "{{user `client_id`}}",
+    "client_secret": "{{user `client_secret`}}",
+    "subscription_id": "{{user `subscription_id`}}",
+    "tenant_id": "{{user `tenant_id`}}",
+    "storage_account": "{{user `storage_account`}}",
+
+    "managed_image_resource_group_name": "{{user `azure-resource-group`}}",
+    "managed_image_name": "windows-iis-{{isotime | clean_resource_name}}",
+
+    "os_type": "Windows",
+    "image_publisher": "MicrosoftWindowsServer",
+    "image_offer": "WindowsServer",
+    "image_sku": "2016-Datacenter",
+
+    "communicator": "winrm",
+    "winrm_use_ssl": true,
+    "winrm_insecure": true,
+    "winrm_timeout": "15m",
+    "winrm_username": "packer",
+
+    "azure_tags": {
+        "dept": "Engineering",
+        "task": "Image deployment",
+        "creation_timestamp": "{{isotime}}"
+    },
+
+    "build_resource_group_name": "PackerBuilderRG",
+    "vm_size": "{{user `azure-image-builder-size`}}"
+  }],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "scripts": [
+        "./provisioning/helloworld.ps1",
+        "./provisioning/chocolatey.ps1"
+      ] 
+    },
+    {
+      "type": "inspec",
+      "profile": "./file_validation"
+    },
+    {
+      "type": "inspec",
+      "profile": "./choco_validation"
+    },
+    {
+      "type": "powershell",
+      "script": "./provisioning/prep_system.ps1"
+    }
+  ]
+}
+
