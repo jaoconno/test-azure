@@ -4,8 +4,8 @@
     "client_secret": "",
     "subscription_id": "",
     "tenant_id": "",
-    "azure-resource-group": "default",
-    "azure-image-builder-size": "Standard_A4_v2"
+    "azure_resource_group": "jengold",
+    "azure_image_builder_size": "Standard_A4_v2"
   },
 
   "builders": [{
@@ -17,7 +17,7 @@
     "tenant_id": "{{user `tenant_id`}}",
     "storage_account": "{{user `storage_account`}}",
 
-    "managed_image_resource_group_name": "{{user `azure-resource-group`}}",
+    "managed_image_resource_group_name": "{{user `azure_resource_group`}}",
     "managed_image_name": "windows-iis-{{isotime | clean_resource_name}}",
 
     "os_type": "Windows",
@@ -38,7 +38,7 @@
     },
 
     "build_resource_group_name": "PackerBuilderRG",
-    "vm_size": "{{user `azure-image-builder-size`}}"
+    "vm_size": "{{user `azure_image_builder_size`}}"
   }],
   "provisioners": [
     {
