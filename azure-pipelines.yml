@@ -1,0 +1,61 @@
+# Packer pipeline
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    exclude:
+    - docs/
+    - Brewfile
+    - README.md
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs: 
+- job: getCreds
+  displayName: Get credentials from ADO
+  steps:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'azure-flywheel'
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "##vso[task.setvariable variable=tenantId;isOutput=true;issecret=true]$env:tenantId"
+          echo "##vso[task.setvariable variable=servicePrincipalId;isOutput=true;issecret=true]$env:servicePrincipalId"
+          echo "##vso[task.setvariable variable=servicePrincipalKey;isOutput=true;issecret=true]$env:servicePrincipalKey"
+          $accountId = (az account show | ConvertFrom-Json).id
+          echo "##vso[task.setvariable variable=account;isOutput=true;issecret=true]$accountId"
+        addSpnToEnvironment: true
+      displayName: Get SP Credentials
+      name: spCreds
+
+- job: Build_Golden_Image
+  dependsOn: getCreds
+  pool: 
+    name: flywheel-linux
+    demands: inspec
+  variables:
+    AZURE_TENANT_ID: $[ dependencies.getCreds.outputs['spCreds.tenantId'] ]
+    AZURE_CLIENT_ID: $[ dependencies.getCreds.outputs['spCreds.servicePrincipalId'] ]
+    AZURE_CLIENT_SECRET: $[ dependencies.getCreds.outputs['spCreds.servicePrincipalKey'] ]
+    AZURE_SUBSCRIPTION_ID: $[ dependencies.getCreds.outputs['spCreds.account'] ]
+  steps:
+  - task: PackerBuild@1
+    inputs:
+      templateType: 'custom'
+      customTemplateLocation: 'golden_image_packer.json'
+      customTemplateParameters: |
+        {
+            "azure-resource-group": "$(azure-resource-group)",
+            "azure-image-builder-size": "$(azure-image-builder-size)",
+            "client_id": "$(AZURE_CLIENT_ID)",
+            "client_secret": "$(AZURE_CLIENT_SECRET)",
+            "tenant_id": "$(AZURE_TENANT_ID)",
+            "subscription_id": "$(AZURE_SUBSCRIPTION_ID)"
+        }
+      packerVersion: '1.5.1'
+      imageUri: 'CANDIDATE_IMAGE'
+
+
