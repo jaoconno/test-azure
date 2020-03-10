@@ -1,0 +1,15 @@
+# local tooling
+Brewfile.lock.json
+.vscode/
+
+# Cache objects
+packer_cache/
+
+# For built boxes
+*.box
+
+# Terraform files
+.terraform/
+
+# Mac
+.DS_Store
