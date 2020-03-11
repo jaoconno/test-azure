@@ -37,7 +37,7 @@
         "creation_timestamp": "{{isotime}}"
     },
 
-    "build_resource_group_name": "PackerBuilderRG",
+    "build_resource_group_name": "{{user `azure_resource_group`}}",
     "vm_size": "{{user `azure_image_builder_size`}}"
   }],
   "provisioners": [
@@ -47,14 +47,6 @@
         "./provisioning/helloworld.ps1",
         "./provisioning/chocolatey.ps1"
       ] 
-    },
-    {
-      "type": "inspec",
-      "profile": "./file_validation"
-    },
-    {
-      "type": "inspec",
-      "profile": "./choco_validation"
     },
     {
       "type": "powershell",
